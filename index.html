@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Curated Tech & Gadget Picks</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50 p-4">
+    <div class="max-w-4xl mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+        <i class="fa-solid fa-bolt text-blue-400 mr-2"></i>Select Deals Hub
+      </h1>
+      <span class="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-1 rounded-full">
+        Daily Auto Update
+      </span>
+    </div>
+  </header>
+
+  <!-- Hero & Filter -->
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    <div class="text-center mb-8">
+      <h2 class="text-2xl font-extrabold mb-2">厳選ガジェット＆ビジネスギア</h2>
+      <p class="text-slate-400 text-sm">毎日自動更新される高評価アイテム・実用リソース一覧</p>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="flex gap-2 justify-center mb-6 overflow-x-auto pb-2">
+      <button onclick="filterCategory('all')" class="cat-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white">すべて</button>
+      <button onclick="filterCategory('gadget')" class="cat-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300">ガジェット</button>
+      <button onclick="filterCategory('book')" class="cat-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300">書籍・学習</button>
+      <button onclick="filterCategory('desk')" class="cat-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300">デスク環境</button>
+    </div>
+
+    <!-- Product Grid -->
+    <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Loading state -->
+      <div class="col-span-full text-center py-12 text-slate-500">データを読み込み中...</div>
+    </div>
+  </main>
+
+  <script>
+    let products = [];
+
+    // JSONデータを取得して表示
+    async function init() {
+      try {
+        const res = await fetch('./data/products.json?t=' + Date.now());
+        products = await res.json();
+        renderProducts(products);
+      } catch (err) {
+        document.getElementById('product-grid').innerHTML = 
+          '<p class="col-span-full text-center text-rose-400 text-sm">データの読み込みに失敗しました。</p>';
+      }
+    }
+
+    function renderProducts(items) {
+      const grid = document.getElementById('product-grid');
+      grid.innerHTML = items.map(item => `
+        <div class="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-500 transition">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-700 text-slate-300">
+                ${item.category}
+              </span>
+              <span class="text-xs font-semibold text-emerald-400">${item.badge || 'RECOMMENDED'}</span>
+            </div>
+            <h3 class="font-bold text-base mb-1 text-slate-100">${item.title}</h3>
+            <p class="text-xs text-slate-400 mb-4 leading-relaxed">${item.description}</p>
+          </div>
+          <div class="pt-3 border-t border-slate-700/50 flex items-center justify-between">
+            <span class="text-xs text-slate-400">参考価格帯: <b class="text-slate-200">${item.price}</b></span>
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer" 
+               class="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg transition">
+              詳細を見る <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterCategory(cat) {
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.className = 'cat-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300';
+      });
+      event.target.className = 'cat-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white';
+
+      if (cat === 'all') {
+        renderProducts(products);
+      } else {
+        renderProducts(products.filter(p => p.category === cat));
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
